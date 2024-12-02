@@ -53,6 +53,26 @@ def delete_book(book_id):
     db.session.commit()
     return jsonify({'message': 'Book deleted'}), 204
 
+@app.route('/api/check-duplicate', methods=['POST'])
+def check_duplicate():
+    data = request.get_json()  # Get data from Postman
+
+    title = data.get('title')
+    author = data.get('author')
+    duplicate_book = Book.query.filter_by(title=title, author=author).first()
+
+    if duplicate_book:
+        return jsonify({
+            "message": "Duplicate book found.",
+            "book": {
+                "id": duplicate_book.id,
+                "title": duplicate_book.title,
+                "author": duplicate_book.author
+            }
+        }), 400  # 400 Bad Request
+    else:
+        return jsonify({"message": "No duplicate found."}), 200  # 200 OK
+
 if __name__ == '__main__':
     with app.app_context():  # Create an application context
         db.create_all()  # Create database tables
